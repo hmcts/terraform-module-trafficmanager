@@ -11,10 +11,10 @@ resource "azurerm_traffic_manager_endpoint" "traffic_manager_endpoint" {
   }
   endpoint_location   = lookup(each.value, "endpoint_location", null)
   endpoint_status     = lookup(each.value, "endpoint_status", null)
-  geo_mappings        = split(",", replace(lookup(route.value, "geo_mappings", null), " ", ""))
+  geo_mappings        = lookup(each.value, "geo_mappings", null) != null ? split(",", replace(lookup(each.value, "geo_mappings", ""), " ", "")) : null
   name                = each.key
   priority            = lookup(each.value, "priority", null)
-  profile_name        = lookup(each.value, "profile_name", each.key)
+  profile_name        = lookup(each.value, "profile_name", null)
   resource_group_name = lookup(each.value, "resource_group_name", azurerm_resource_group.traffic_manager_resource_group[0].name)
   dynamic "subnet" {
     for_each = lookup(var.traffic_manager_endpoint_subnets, each.key, null) != null ? lookup(var.traffic_manager_endpoint_subnets, each.key, null) : []
@@ -28,6 +28,4 @@ resource "azurerm_traffic_manager_endpoint" "traffic_manager_endpoint" {
   target_resource_id = lookup(each.value, "target_resource_id", null)
   type               = lookup(each.value, "type", null)
   weight             = lookup(each.value, "weight", null)
-
-  tags = var.common_tags
 }
