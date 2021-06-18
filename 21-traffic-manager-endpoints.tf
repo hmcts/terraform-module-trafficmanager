@@ -28,4 +28,8 @@ resource "azurerm_traffic_manager_endpoint" "traffic_manager_endpoint" {
   target_resource_id = lookup(each.value, "target_resource_id", null)
   type               = lookup(each.value, "type", null)
   weight             = lookup(each.value, "weight", null)
+
+  depends_on = [
+    azurerm_traffic_manager_profile.traffic_manager_profile
+  ]
 }
