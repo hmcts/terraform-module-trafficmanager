@@ -15,7 +15,7 @@ resource "azurerm_traffic_manager_endpoint" "traffic_manager_endpoint" {
   name                = each.key
   priority            = lookup(each.value, "priority", null)
   profile_name        = lookup(each.value, "profile_name", null)
-  resource_group_name = lookup(each.value, "resource_group_name", azurerm_resource_group.traffic_manager_resource_group[0].name)
+  resource_group_name = lookup(each.value, "resource_group_name", null)
   dynamic "subnet" {
     for_each = lookup(var.traffic_manager_endpoint_subnets, each.key, null) != null ? lookup(var.traffic_manager_endpoint_subnets, each.key, null) : []
     content {
