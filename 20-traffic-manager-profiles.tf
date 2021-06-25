@@ -30,7 +30,7 @@ resource "azurerm_traffic_manager_profile" "traffic_manager_profile" {
   }
   name                   = each.key
   profile_status         = lookup(each.value, "profile_status", null)
-  resource_group_name    = lookup(each.value, "resource_group_name", azurerm_resource_group.traffic_manager_resource_group[0].name)
+  resource_group_name    = lookup(each.value, "resource_group_name", null)
   traffic_routing_method = lookup(each.value, "traffic_routing_method", null)
   traffic_view_enabled   = lookup(each.value, "traffic_view_enabled", null)
 
