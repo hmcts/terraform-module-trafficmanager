@@ -13,7 +13,7 @@ resource "azurerm_traffic_manager_azure_endpoint" "traffic_manager_azure_endpoin
   geo_mappings        = lookup(each.value, "geo_mappings", null) != null ? split(",", replace(lookup(each.value, "geo_mappings", ""), " ", "")) : null
   name                = each.key
   priority            = lookup(each.value, "priority", null)
-  profile_id          = azurerm_traffic_manager_profile.traffic_manager_profile[each.key].id
+  profile_id          = azurerm_traffic_manager_profile.traffic_manager_profile[each.value].id
   dynamic "subnet" {
     for_each = lookup(var.traffic_manager_endpoint_subnets, each.key, null) != null ? lookup(var.traffic_manager_endpoint_subnets, each.key, null) : []
     content {
