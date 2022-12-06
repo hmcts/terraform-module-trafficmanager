@@ -1,5 +1,5 @@
 # Virtual Hubs
-resource "azurerm_traffic_manager_azure_endpoint" "traffic_manager_azure_endpoint" {
+resource "azurerm_traffic_manager_azure_endpoint" "traffic_manager_endpoint" {
   for_each = var.traffic_manager_endpoints
 
   dynamic "custom_header" {
