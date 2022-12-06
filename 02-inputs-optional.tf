@@ -35,7 +35,7 @@ variable "traffic_manager_endpoint_subnets" {
 
 # Traffic Manager Profiles
 variable "traffic_manager_profiles" {
-  type    = map(list(map(any)))
+  type    = map(any)
   default = {}
 }
 
