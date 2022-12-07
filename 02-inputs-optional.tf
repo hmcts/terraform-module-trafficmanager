@@ -17,12 +17,6 @@ variable "resource_group_name" {
   default     = null
 }
 
-# Traffic Manager Endpoints
-variable "traffic_manager_endpoints" {
-  type    = map(map(any))
-  default = {}
-}
-
 variable "traffic_manager_endpoint_custom_headers" {
   type    = map(list(map(string)))
   default = {}
@@ -35,7 +29,7 @@ variable "traffic_manager_endpoint_subnets" {
 
 # Traffic Manager Profiles
 variable "traffic_manager_profiles" {
-  type    = map(map(any))
+  type    = map(any)
   default = {}
 }
 

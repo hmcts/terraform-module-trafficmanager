@@ -1,6 +1,21 @@
 # Virtual Hubs
-resource "azurerm_traffic_manager_endpoint" "traffic_manager_endpoint" {
-  for_each = var.traffic_manager_endpoints
+locals {
+  endpoints = flatten([
+  for profile_key, profile in var.traffic_manager_profiles: [
+  for endpoint_key, endpoint in profile.endpoints :
+  merge( {
+    profile = profile_key,
+    name    = endpoint_key
+  },
+    endpoint )
+  ]
+  ])
+}
+
+
+resource "azurerm_traffic_manager_azure_endpoint" "traffic_manager_endpoint" {
+  for_each = { for endpoint in local.endpoints : endpoint.name => endpoint }
+
 
   dynamic "custom_header" {
     for_each = lookup(var.traffic_manager_endpoint_custom_headers, each.key, null) != null ? lookup(var.traffic_manager_endpoint_custom_headers, each.key, null) : []
@@ -9,13 +24,11 @@ resource "azurerm_traffic_manager_endpoint" "traffic_manager_endpoint" {
       value = custom_header.value["value"]
     }
   }
-  endpoint_location   = lookup(each.value, "endpoint_location", null)
-  endpoint_status     = lookup(each.value, "endpoint_status", null)
+  enabled             = lookup(each.value, "endpoint_status", null)
   geo_mappings        = lookup(each.value, "geo_mappings", null) != null ? split(",", replace(lookup(each.value, "geo_mappings", ""), " ", "")) : null
   name                = each.key
   priority            = lookup(each.value, "priority", null)
-  profile_name        = lookup(each.value, "profile_name", null)
-  resource_group_name = lookup(each.value, "resource_group_name", null)
+  profile_id          = azurerm_traffic_manager_profile.traffic_manager_profile[each.value.profile].id
   dynamic "subnet" {
     for_each = lookup(var.traffic_manager_endpoint_subnets, each.key, null) != null ? lookup(var.traffic_manager_endpoint_subnets, each.key, null) : []
     content {
@@ -24,12 +37,6 @@ resource "azurerm_traffic_manager_endpoint" "traffic_manager_endpoint" {
       scope = subnet.value["scope"]
     }
   }
-  target             = lookup(each.value, "target", null)
   target_resource_id = lookup(each.value, "target_resource_id", null)
-  type               = lookup(each.value, "type", null)
   weight             = lookup(each.value, "weight", null)
-
-  depends_on = [
-    azurerm_traffic_manager_profile.traffic_manager_profile
-  ]
 }
