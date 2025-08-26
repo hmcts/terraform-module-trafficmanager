@@ -1,14 +1,14 @@
 # Virtual Hubs
 locals {
   endpoints = flatten([
-  for profile_key, profile in var.traffic_manager_profiles: [
-  for endpoint_key, endpoint in profile.endpoints :
-  merge( {
-    profile = profile_key,
-    name    = endpoint_key
-  },
-    endpoint )
-  ]
+    for profile_key, profile in var.traffic_manager_profiles : [
+      for endpoint_key, endpoint in profile.endpoints :
+      merge({
+        profile = profile_key,
+        name    = endpoint_key
+        },
+      endpoint)
+    ]
   ])
 }
 
@@ -24,11 +24,13 @@ resource "azurerm_traffic_manager_azure_endpoint" "traffic_manager_endpoint" {
       value = custom_header.value["value"]
     }
   }
-  enabled             = lookup(each.value, "endpoint_status", null)
-  geo_mappings        = lookup(each.value, "geo_mappings", null) != null ? split(",", replace(lookup(each.value, "geo_mappings", ""), " ", "")) : null
-  name                = each.key
-  priority            = lookup(each.value, "priority", null)
-  profile_id          = azurerm_traffic_manager_profile.traffic_manager_profile[each.value.profile].id
+  enabled      = lookup(each.value, "endpoint_status", null)
+  geo_mappings = lookup(each.value, "geo_mappings", null) != null ? split(",", replace(lookup(each.value, "geo_mappings", ""), " ", "")) : null
+  name         = each.key
+  priority = (
+    azurerm_traffic_manager_profile.traffic_manager_profile[each.value.profile].traffic_routing_method == "Priority" ? lookup(each.value, "priority", null) : null
+  )
+  profile_id = azurerm_traffic_manager_profile.traffic_manager_profile[each.value.profile].id
   dynamic "subnet" {
     for_each = lookup(var.traffic_manager_endpoint_subnets, each.key, null) != null ? lookup(var.traffic_manager_endpoint_subnets, each.key, null) : []
     content {
@@ -38,5 +40,7 @@ resource "azurerm_traffic_manager_azure_endpoint" "traffic_manager_endpoint" {
     }
   }
   target_resource_id = lookup(each.value, "target_resource_id", null)
-  weight             = lookup(each.value, "weight", null)
+  weight = (
+    azurerm_traffic_manager_profile.traffic_manager_profile[each.value.profile].traffic_routing_method == "Weighted" ? lookup(each.value, "weight", null) : null
+  )
 }
